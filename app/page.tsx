@@ -9,13 +9,27 @@ import { colorForUser } from "@/lib/colors";
 // 서버 캐시: 14일치 예약을 'reservations' 태그로 보관
 // → POST/DELETE/PATCH 가 revalidateTag('reservations') 호출 시까지 DB 안 침
 // → 60초 안전 revalidate (이벤트 없이도 1분 이상 묵으면 자동 갱신)
+// unstable_cache 는 결과를 직렬화/역직렬화하므로 Date → string 으로 미리 변환해서 캐싱
+type CachedRow = {
+  id: string;
+  roomId: string;
+  title: string;
+  attendees: number;
+  startAt: string;
+  endAt: string;
+  status: string;
+  userId: string;
+  userName: string;
+  employeeId: string;
+};
+
 const getCached14DayReservations = unstable_cache(
-  async (_dateKey: string) => {
+  async (_dateKey: string): Promise<CachedRow[]> => {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
     const end = new Date(start);
     end.setDate(end.getDate() + 14);
-    return prisma.reservation.findMany({
+    const rows = await prisma.reservation.findMany({
       where: {
         startAt: { gte: start, lt: end },
         status: { in: ["confirmed", "pending"] },
@@ -23,6 +37,18 @@ const getCached14DayReservations = unstable_cache(
       include: { user: { select: { name: true, employeeId: true } } },
       orderBy: { startAt: "asc" },
     });
+    return rows.map((r) => ({
+      id: r.id,
+      roomId: r.roomId,
+      title: r.title,
+      attendees: r.attendees,
+      startAt: r.startAt.toISOString(),
+      endAt: r.endAt.toISOString(),
+      status: r.status,
+      userId: r.userId,
+      userName: r.user.name,
+      employeeId: r.user.employeeId,
+    }));
   },
   ["reservations-14d"],
   { tags: ["reservations"], revalidate: 60 },
@@ -42,11 +68,11 @@ export default async function HomePage() {
     roomId: r.roomId,
     title: r.title,
     attendees: r.attendees,
-    startAt: r.startAt.toISOString(),
-    endAt: r.endAt.toISOString(),
+    startAt: r.startAt,
+    endAt: r.endAt,
     status: r.status as ReservationDTO["status"],
-    userName: r.user.name,
-    employeeId: r.user.employeeId,
+    userName: r.userName,
+    employeeId: r.employeeId,
     mine: user ? r.userId === user.id : false,
   }));
 
