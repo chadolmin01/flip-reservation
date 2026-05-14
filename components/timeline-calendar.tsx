@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ROOMS, type ReservationDTO } from "@/lib/rooms";
@@ -21,12 +21,17 @@ function dayLabel(date: Date, offset: number): string {
   return formatDateKo(date);
 }
 
-export function TimelineCalendar() {
+export function TimelineCalendar({
+  initialReservations = [],
+}: {
+  initialReservations?: ReservationDTO[];
+}) {
   const { user } = useAuth();
   const [dayOffset, setDayOffset] = useState(0);
-  const [reservations, setReservations] = useState<ReservationDTO[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [reservations, setReservations] = useState<ReservationDTO[]>(initialReservations);
+  const [loading, setLoading] = useState(false);
   const [, setTick] = useState(0);
+  const firstRender = useRef(true);
 
   // 1분마다 강제 리렌더 → 지난 시간 표시 자동 갱신
   useEffect(() => {
@@ -42,6 +47,12 @@ export function TimelineCalendar() {
   }, [dayOffset]);
 
   useEffect(() => {
+    // 첫 렌더 + dayOffset=0이면 서버에서 미리 받은 initialReservations 사용 → fetch 스킵
+    if (firstRender.current && dayOffset === 0) {
+      firstRender.current = false;
+      return;
+    }
+    firstRender.current = false;
     let cancelled = false;
     setLoading(true);
     fetch(`/api/reservations?day=${dayOffset}`, { cache: "no-store" })
