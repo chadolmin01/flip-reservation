@@ -28,7 +28,7 @@ export function generateUsageLogXls(opts: {
   month: number; // 1-12
   room: Room;
   rows: ExportRow[];
-}): Buffer {
+}): Uint8Array {
   const { month, room, rows } = opts;
 
   const aoa: (string | number | null)[][] = [
@@ -87,5 +87,6 @@ export function generateUsageLogXls(opts: {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "공간사용일지");
 
-  return XLSX.write(wb, { bookType: "xls", type: "buffer" });
+  // type 'array'를 쓰면 Uint8Array를 반환 — NextResponse 의 BodyInit 호환
+  return XLSX.write(wb, { bookType: "xls", type: "array" }) as Uint8Array;
 }

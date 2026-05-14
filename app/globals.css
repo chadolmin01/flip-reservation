@@ -1,7 +1,8 @@
-@import "tailwindcss";
-
 /* ---------- Pretendard Variable (한국어 + 영문 통합, Cereal VF 대체) ---------- */
+/* @import url 은 다른 규칙 앞에 와야 함 */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+@import "tailwindcss";
 
 /* ============================================================
    Airbnb 디자인 시스템 — 우정원 회의실 예약
