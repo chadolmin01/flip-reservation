@@ -66,20 +66,41 @@ export default async function RoomDetailPage({
         </p>
       </header>
 
-      {/* 사진 */}
-      <section className="relative rounded-xl overflow-hidden aspect-[2/1] mb-10 bg-surface-soft">
-        <Image
-          src={room.photoUrl}
-          alt={room.name}
-          fill
-          sizes="(max-width: 1080px) 100vw, 1080px"
-          priority
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-        <span className="absolute bottom-5 left-6 text-white text-display-xl drop-shadow">
-          {room.name}
-        </span>
+      {/* 사진 갤러리 (Airbnb 스타일) */}
+      <section className="grid gap-2 mb-10 rounded-xl overflow-hidden aspect-[2/1] grid-cols-4 grid-rows-2">
+        {/* 메인 — 좌측 절반 */}
+        <div className="relative col-span-2 row-span-2 bg-surface-soft">
+          <Image
+            src={room.photos[0]}
+            alt={`${room.name} 메인 사진`}
+            fill
+            sizes="(max-width: 1080px) 100vw, 540px"
+            priority
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+          <span className="absolute bottom-5 left-6 text-white text-display-xl drop-shadow">
+            {room.name}
+          </span>
+        </div>
+
+        {/* 서브 사진 — 2x2 (최대 4장). 사진 부족하면 surface-soft fallback */}
+        {[1, 2, 3, 4].map((i) => {
+          const photo = room.photos[i];
+          return (
+            <div key={i} className="relative bg-surface-soft">
+              {photo && (
+                <Image
+                  src={photo}
+                  alt={`${room.name} 사진 ${i + 1}`}
+                  fill
+                  sizes="270px"
+                  className="object-cover"
+                />
+              )}
+            </div>
+          );
+        })}
       </section>
 
       {/* body — 2-column */}

@@ -2,12 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { ROOMS } from "@/lib/rooms";
-import {
-  MAX_HOURS_PER_RESERVATION,
-  MAX_HOURS_PER_WEEK,
-  getWeekRange,
-  hoursBetween,
-} from "@/lib/limits";
 
 const VALID_ROOMS = new Set(ROOMS.map((r) => r.id));
 
@@ -103,39 +97,6 @@ export async function POST(req: Request) {
   if (!Number.isFinite(att) || att < 1 || att > room.capacity) {
     return NextResponse.json(
       { error: `참석 인원은 1–${room.capacity}명 사이여야 합니다` },
-      { status: 400 },
-    );
-  }
-
-  // 1회 예약 최대 시간 검증
-  const durationH = hoursBetween(start, end);
-  if (durationH > MAX_HOURS_PER_RESERVATION) {
-    return NextResponse.json(
-      { error: `1회 예약은 최대 ${MAX_HOURS_PER_RESERVATION}시간까지 가능합니다` },
-      { status: 400 },
-    );
-  }
-
-  // 주간 한도 검증 (해당 주, 본인 예약 합계 + 신규 < 12h)
-  const { start: weekStart, end: weekEnd } = getWeekRange(start);
-  const weekRes = await prisma.reservation.findMany({
-    where: {
-      userId: me.id,
-      status: { in: ["confirmed", "pending"] },
-      startAt: { gte: weekStart, lt: weekEnd },
-    },
-  });
-  const usedH = weekRes.reduce(
-    (sum, r) => sum + hoursBetween(r.startAt, r.endAt),
-    0,
-  );
-  if (usedH + durationH > MAX_HOURS_PER_WEEK + 1e-6) {
-    return NextResponse.json(
-      {
-        error: `주간 한도 초과 (이번 주 ${usedH.toFixed(
-          1,
-        )}h 사용 중 · 한도 ${MAX_HOURS_PER_WEEK}h · 추가 ${durationH.toFixed(1)}h 불가)`,
-      },
       { status: 400 },
     );
   }

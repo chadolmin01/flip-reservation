@@ -58,11 +58,6 @@ export function ReserveForm({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [dayResvs, setDayResvs] = useState<ReservationDTO[]>([]);
-  const [quota, setQuota] = useState<{
-    usedHours: number;
-    weeklyLimit: number;
-    perReservationLimit: number;
-  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,14 +71,6 @@ export function ReserveForm({
               r.status === "confirmed" || r.status === "pending",
           ),
         );
-      })
-      .catch(() => {});
-
-    fetch(`/api/quota?day=${day}`, { cache: "no-store" })
-      .then((r) => r.json())
-      .then((json) => {
-        if (cancelled) return;
-        if (json.usedHours != null) setQuota(json);
       })
       .catch(() => {});
 
@@ -104,11 +91,6 @@ export function ReserveForm({
     });
   }, [dayResvs, selRoom, selStart, selEnd]);
 
-  const duration = selStart != null && selEnd != null ? selEnd - selStart : 0;
-  const overSession =
-    quota != null && duration > quota.perReservationLimit + 1e-6;
-  const overWeek =
-    quota != null && quota.usedHours + duration > quota.weeklyLimit + 1e-6;
 
   const room = ROOMS.find((r) => r.id === selRoom) ?? initialRoom;
 
@@ -256,18 +238,9 @@ export function ReserveForm({
             conflict={conflict}
             onSelect={applySelection}
           />
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-caption-sm text-muted">
-            <span>시간 칸을 클릭하고 드래그하세요.</span>
-            {quota && (
-              <span>
-                1회 최대 {quota.perReservationLimit}시간 · 이번 주{" "}
-                <span className="text-ink font-medium tabular-nums">
-                  {quota.usedHours.toFixed(1)}
-                </span>{" "}
-                / {quota.weeklyLimit}시간 사용
-              </span>
-            )}
-          </div>
+          <p className="text-caption-sm text-muted mt-2">
+            시간 칸을 클릭하고 드래그하세요.
+          </p>
         </div>
 
         {/* 3단: 선택 요약 + 제출 */}
@@ -284,18 +257,6 @@ export function ReserveForm({
                     <span className="ml-2 inline-flex items-center gap-1 text-error font-medium">
                       <AlertTriangle className="w-3.5 h-3.5" />
                       다른 예약과 겹칩니다
-                    </span>
-                  )}
-                  {!conflict && overSession && (
-                    <span className="ml-2 inline-flex items-center gap-1 text-error font-medium">
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                      1회 최대 {quota?.perReservationLimit}시간 초과
-                    </span>
-                  )}
-                  {!conflict && !overSession && overWeek && (
-                    <span className="ml-2 inline-flex items-center gap-1 text-error font-medium">
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                      주간 한도 ({quota?.weeklyLimit}시간) 초과
                     </span>
                   )}
                 </p>
@@ -324,8 +285,6 @@ export function ReserveForm({
                 selStart == null ||
                 selEnd == null ||
                 conflict ||
-                overSession ||
-                overWeek ||
                 submitting
               }
               className="h-11 px-6 rounded-sm text-white text-button-md transition disabled:opacity-40"

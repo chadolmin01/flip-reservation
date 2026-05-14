@@ -44,18 +44,18 @@ export default function MyPage() {
 
   return (
     <div className="mx-auto max-w-[1080px] px-6 lg:px-10 py-8">
-      <div className="flex items-center gap-3 mb-2">
+      <div className="flex items-center gap-3 mb-8">
         <span
           className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white font-medium"
           style={{ background: color.fill }}
         >
           {user.name.slice(0, 1)}
         </span>
-        <h1 className="text-display-xl text-ink">{user.name}님의 예약</h1>
+        <h1 className="text-display-xl text-ink">
+          {user.name}
+          <span className="text-muted font-normal ml-1.5">#{user.employeeId}</span>
+        </h1>
       </div>
-      <p className="text-body-md text-muted mb-8">
-        사번 <span className="text-ink font-medium">{user.employeeId}</span> 으로 만든 예약입니다.
-      </p>
 
       {loading ? (
         <p className="text-body-md text-muted py-10 text-center">불러오는 중…</p>

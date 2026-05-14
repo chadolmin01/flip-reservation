@@ -2,14 +2,25 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { Check, X } from "lucide-react";
+import { Check, X, Lock } from "lucide-react";
 import { ROOMS, getRoom, type ReservationDTO } from "@/lib/rooms";
 import { cn, formatTime } from "@/lib/utils";
 
+const ADMIN_PASSWORD = "FLIP1234";
+const ADMIN_UNLOCK_KEY = "wjw_admin_unlocked";
+
 export default function AdminPage() {
+  const [unlocked, setUnlocked] = useState(false);
+  const [pwReady, setPwReady] = useState(false);
   const [reservations, setReservations] = useState<ReservationDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<Set<string>>(new Set());
+
+  // 세션 동안 잠금 해제 유지
+  useEffect(() => {
+    setUnlocked(sessionStorage.getItem(ADMIN_UNLOCK_KEY) === "1");
+    setPwReady(true);
+  }, []);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -34,8 +45,20 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    if (unlocked) refresh();
+  }, [refresh, unlocked]);
+
+  if (!pwReady) return null;
+  if (!unlocked) {
+    return (
+      <AdminGate
+        onUnlock={() => {
+          sessionStorage.setItem(ADMIN_UNLOCK_KEY, "1");
+          setUnlocked(true);
+        }}
+      />
+    );
+  }
 
   async function decide(id: string, status: "confirmed" | "rejected") {
     setBusy((s) => new Set(s).add(id));
@@ -226,6 +249,56 @@ function Kpi({ label, value }: { label: string; value: string }) {
     <div className="bg-canvas border border-hairline rounded-md p-5">
       <p className="text-body-sm text-muted">{label}</p>
       <p className="text-display-xl text-ink mt-2 leading-none">{value}</p>
+    </div>
+  );
+}
+
+function AdminGate({ onUnlock }: { onUnlock: () => void }) {
+  const [pw, setPw] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (pw === ADMIN_PASSWORD) {
+      onUnlock();
+    } else {
+      setError("비밀번호가 일치하지 않습니다");
+      setPw("");
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-[420px] px-6 py-20 text-center">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-soft mb-4">
+        <Lock className="w-7 h-7 text-ink" />
+      </div>
+      <h1 className="text-display-xl text-ink">관리자 페이지</h1>
+      <p className="text-body-md text-muted mt-2">
+        관리자 비밀번호를 입력하세요.
+      </p>
+
+      <form onSubmit={submit} className="mt-8 space-y-3 text-left">
+        <input
+          type="password"
+          required
+          autoFocus
+          value={pw}
+          onChange={(e) => {
+            setPw(e.target.value);
+            setError(null);
+          }}
+          placeholder="비밀번호"
+          className="w-full h-12 rounded-sm border border-hairline px-3.5 text-body-md placeholder:text-muted-soft focus:outline-none focus:border-2 focus:border-ink focus:px-[13px] transition"
+        />
+        {error && <p className="text-caption-sm text-error">{error}</p>}
+        <button
+          type="submit"
+          disabled={!pw}
+          className="w-full h-12 rounded-sm bg-rausch text-white text-button-md hover:bg-rausch-active disabled:bg-rausch-disabled transition"
+        >
+          들어가기
+        </button>
+      </form>
     </div>
   );
 }
