@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Check, X, Lock, Download } from "lucide-react";
+import { Lock, Download } from "lucide-react";
 import { ROOMS, getRoom, type ReservationDTO } from "@/lib/rooms";
-import { cn, formatTime } from "@/lib/utils";
+import { cn, formatDateKo, formatTime } from "@/lib/utils";
 
 const ADMIN_PASSWORD = "FLIP1234";
 const ADMIN_UNLOCK_KEY = "wjw_admin_unlocked";
@@ -15,22 +14,15 @@ export function AdminDashboard({
 }: {
   initialReservations: ReservationDTO[];
 }) {
-  const router = useRouter();
   const [unlocked, setUnlocked] = useState(false);
   const [pwReady, setPwReady] = useState(false);
-  const [reservations, setReservations] = useState(initialReservations);
-  const [busy, setBusy] = useState<Set<string>>(new Set());
+  const reservations = initialReservations;
 
   // 세션 동안 잠금 해제 유지
   useEffect(() => {
     setUnlocked(sessionStorage.getItem(ADMIN_UNLOCK_KEY) === "1");
     setPwReady(true);
   }, []);
-
-  // 서버에서 새 데이터 들어오면 동기화 (router.refresh 후)
-  useEffect(() => {
-    setReservations(initialReservations);
-  }, [initialReservations]);
 
   // 월별 내보내기 상태
   const todayDate = new Date();
@@ -59,35 +51,6 @@ export function AdminDashboard({
       />
     );
   }
-
-  async function decide(id: string, status: "confirmed" | "rejected") {
-    setBusy((s) => new Set(s).add(id));
-    // 낙관 업데이트
-    const prev = reservations;
-    setReservations((curr) =>
-      curr.map((r) => (r.id === id ? { ...r, status } : r)),
-    );
-    try {
-      const res = await fetch(`/api/reservations/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      if (!res.ok) {
-        setReservations(prev); // rollback
-      } else {
-        router.refresh(); // 다른 페이지(/)의 캐시도 같이 invalidate
-      }
-    } finally {
-      setBusy((s) => {
-        const next = new Set(s);
-        next.delete(id);
-        return next;
-      });
-    }
-  }
-
-  const pending = reservations.filter((r) => r.status === "pending");
 
   const today0 = new Date();
   today0.setHours(0, 0, 0, 0);
@@ -122,13 +85,12 @@ export function AdminDashboard({
         <p className="text-uppercase-tag uppercase text-muted mb-1">관리자</p>
         <h1 className="text-display-xl text-ink">시설 운영</h1>
         <p className="text-body-md text-muted mt-1">
-          오늘 {todayCount}건 예정 · 승인 대기 {pending.length}건 · 14일 합산 {reservations.length}건
+          오늘 {todayCount}건 예정 · 14일 합산 {reservations.length}건
         </p>
       </header>
 
-      <div className="grid grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-2 gap-4 mb-10">
         <Kpi label="오늘 예약" value={String(todayCount)} />
-        <Kpi label="승인 대기" value={String(pending.length)} />
         <Kpi label="14일 합산" value={String(reservations.length)} />
       </div>
 
@@ -179,61 +141,6 @@ export function AdminDashboard({
         </div>
       </section>
 
-      <section className="mb-10">
-        <h2 className="text-display-md text-ink mb-3">승인 대기</h2>
-        <div className="bg-canvas border border-hairline rounded-md overflow-hidden">
-          {pending.length === 0 ? (
-            <div className="px-5 py-12 text-center text-body-md text-muted">
-              승인 대기 중인 예약이 없습니다.
-            </div>
-          ) : (
-            pending.map((r) => {
-              const room = getRoom(r.roomId);
-              if (!room) return null;
-              const start = new Date(r.startAt);
-              const end = new Date(r.endAt);
-              return (
-                <div
-                  key={r.id}
-                  className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 px-5 py-4 border-b last:border-b-0 border-hairline-soft items-center"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Image
-                      src={room.photoUrl}
-                      alt={room.name}
-                      width={40}
-                      height={40}
-                      className="w-10 h-10 rounded-sm shrink-0 object-cover"
-                    />
-                    <div className="min-w-0">
-                      <p className="text-title-sm text-ink truncate">{r.title}</p>
-                      <p className="text-body-sm text-muted truncate">
-                        {r.userName} · {r.employeeId} · {room.name} · {formatTime(start)}–{formatTime(end)} · {r.attendees}명
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 justify-end">
-                    <button
-                      disabled={busy.has(r.id)}
-                      onClick={() => decide(r.id, "rejected")}
-                      className="inline-flex items-center gap-1 h-9 px-3 rounded-full border border-ink text-caption hover:bg-surface-soft disabled:opacity-50"
-                    >
-                      <X className="w-3.5 h-3.5" /> 거절
-                    </button>
-                    <button
-                      disabled={busy.has(r.id)}
-                      onClick={() => decide(r.id, "confirmed")}
-                      className="inline-flex items-center gap-1 h-9 px-3 rounded-full bg-ink text-white text-caption disabled:opacity-50"
-                    >
-                      <Check className="w-3.5 h-3.5" /> 승인
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </section>
 
       <section className="mb-10">
         <h2 className="text-display-md text-ink mb-3">회의실 이용률 (14일)</h2>
@@ -251,51 +158,78 @@ export function AdminDashboard({
       </section>
 
       <section>
-        <h2 className="text-display-md text-ink mb-3">최근 예약</h2>
+        <h2 className="text-display-md text-ink mb-1">예약 · 취소 내역</h2>
+        <p className="text-body-sm text-muted mb-3">
+          최근 14일간 모든 예약 (취소 포함)
+        </p>
         <ul className="bg-canvas border border-hairline rounded-md divide-y divide-hairline-soft">
-          {reservations.slice(0, 10).map((r) => {
-            const room = getRoom(r.roomId);
-            if (!room) return null;
-            const start = new Date(r.startAt);
-            const end = new Date(r.endAt);
-            return (
-              <li key={r.id} className="px-5 py-4 flex items-center gap-4">
-                <Image
-                  src={room.photoUrl}
-                  alt={room.name}
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-sm shrink-0 object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-title-sm text-ink truncate">{r.title}</p>
-                  <p className="text-body-sm text-muted truncate">
-                    {r.userName} · {room.name} · {formatTime(start)}–{formatTime(end)}
-                  </p>
-                </div>
-                <span
+          {reservations.length === 0 ? (
+            <li className="px-5 py-12 text-center text-body-md text-muted">
+              아직 예약이 없습니다.
+            </li>
+          ) : (
+            reservations.map((r) => {
+              const room = getRoom(r.roomId);
+              if (!room) return null;
+              const start = new Date(r.startAt);
+              const end = new Date(r.endAt);
+              const isCancelled = r.status === "cancelled";
+              return (
+                <li
+                  key={r.id}
                   className={cn(
-                    "inline-flex items-center px-2.5 py-1 rounded-full text-badge shrink-0",
-                    r.status === "confirmed"
-                      ? "bg-rausch-tint text-ink"
-                      : r.status === "pending"
-                        ? "bg-canvas border border-dashed border-rausch text-ink"
-                        : "bg-surface-soft text-muted",
+                    "px-5 py-4 flex items-center gap-4",
+                    isCancelled && "opacity-60",
                   )}
                 >
-                  {r.status === "confirmed"
-                    ? "확정"
-                    : r.status === "pending"
-                      ? "대기"
-                      : r.status === "rejected"
-                        ? "거절"
-                        : r.status === "cancelled"
-                          ? "취소"
+                  <Image
+                    src={room.photoUrl}
+                    alt={room.name}
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-sm shrink-0 object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={cn(
+                        "text-title-sm text-ink truncate",
+                        isCancelled && "line-through",
+                      )}
+                    >
+                      {r.title}
+                    </p>
+                    <p className="text-body-sm text-muted truncate">
+                      <span className="text-ink tabular-nums">
+                        {formatDateKo(start)}
+                      </span>
+                      {" · "}
+                      <span className="tabular-nums">
+                        {formatTime(start)}–{formatTime(end)}
+                      </span>
+                      {" · "}
+                      {room.name} · {r.userName}
+                    </p>
+                  </div>
+                  <span
+                    className={cn(
+                      "inline-flex items-center px-2.5 py-1 rounded-full text-badge shrink-0",
+                      r.status === "confirmed"
+                        ? "bg-rausch-tint text-ink"
+                        : "bg-surface-soft text-muted",
+                    )}
+                  >
+                    {r.status === "confirmed"
+                      ? "확정"
+                      : r.status === "cancelled"
+                        ? "취소"
+                        : r.status === "rejected"
+                          ? "거절"
                           : r.status}
-                </span>
-              </li>
-            );
-          })}
+                  </span>
+                </li>
+              );
+            })
+          )}
         </ul>
       </section>
     </div>
