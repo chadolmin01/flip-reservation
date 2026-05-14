@@ -7,15 +7,16 @@ export type UserColor = {
   name: string;
 };
 
+// 무광·중간 채도 8색 (Linear / Notion 풍). 흰 캔버스 위에서 서로 안 부딪치게 정렬.
 export const USER_PALETTE: UserColor[] = [
-  { fill: "#5d7b9d", ring: "#3f5a7d", name: "flip" }, // FLIP 브랜드 색
-  { fill: "#0d8a8a", ring: "#0b6e6e", name: "teal" },
-  { fill: "#7c3aed", ring: "#5b21b6", name: "violet" },
-  { fill: "#c47a09", ring: "#9a5f07", name: "amber" },
-  { fill: "#3a8a4b", ring: "#2c6c39", name: "forest" },
-  { fill: "#db2777", ring: "#a31157", name: "pink" },
-  { fill: "#e85d3c", ring: "#b8421e", name: "coral" },
-  { fill: "#475569", ring: "#334155", name: "slate" },
+  { fill: "#5d7b9d", ring: "#3f5a7d", name: "flip" },       // FLIP 브랜드 스틸블루 (유지)
+  { fill: "#5e9b9b", ring: "#2d6e6e", name: "teal" },       // 세이지 틸
+  { fill: "#7c87c0", ring: "#4a55a0", name: "indigo" },     // 부드러운 인디고
+  { fill: "#c19a5b", ring: "#8a6720", name: "amber" },      // 따뜻한 탄
+  { fill: "#6da27a", ring: "#3f7a52", name: "sage" },       // 더스티 그린
+  { fill: "#c4869a", ring: "#8a4d62", name: "rose" },       // 더스티 로즈
+  { fill: "#c87c64", ring: "#8a4d36", name: "terracotta" }, // 테라코타
+  { fill: "#6b7488", ring: "#3f4858", name: "graphite" },   // 차콜
 ];
 
 export function colorForUser(employeeId: string): UserColor {

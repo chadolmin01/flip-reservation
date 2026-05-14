@@ -210,7 +210,8 @@ function ReservationBlock({ r, mine }: { r: ReservationDTO; mine: boolean }) {
           isPending ? "bg-canvas border border-dashed" : "",
         )}
         style={{
-          background: isPending ? "transparent" : c.fill,
+          // c.fill + alpha (cc = 80%)
+          background: isPending ? "transparent" : `${c.fill}cc`,
           borderColor: isPending ? c.fill : undefined,
           boxShadow: mine ? `inset 0 0 0 2px ${c.ring}` : undefined,
         }}

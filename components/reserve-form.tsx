@@ -474,8 +474,7 @@ function SelectableCalendar({
                     style={{
                       left: `${left}%`,
                       width: `calc(${width}% - 1px)`,
-                      background: c.fill,
-                      opacity: 0.9,
+                      background: `${c.fill}cc`,
                       boxShadow: mine ? `inset 0 0 0 2px ${c.ring}` : undefined,
                     }}
                     title={`${r.title} · ${r.userName}`}
