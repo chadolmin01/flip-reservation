@@ -198,21 +198,21 @@ function ReservationBlock({ r, mine }: { r: ReservationDTO; mine: boolean }) {
 
   return (
     <div
-      className="group absolute top-1.5 bottom-1.5"
+      className="group absolute inset-y-0"
       style={{
         left: `${leftPct}%`,
-        width: `calc(${widthPct}% - 2px)`,
+        width: `calc(${widthPct}% - 1px)`,
       }}
     >
       <div
         className={cn(
-          "h-full w-full rounded-sm cursor-pointer transition",
+          "h-full w-full cursor-pointer transition",
           isPending ? "bg-canvas border border-dashed" : "",
         )}
         style={{
           background: isPending ? "transparent" : c.fill,
           borderColor: isPending ? c.fill : undefined,
-          boxShadow: mine ? `0 0 0 2px ${c.ring}` : undefined,
+          boxShadow: mine ? `inset 0 0 0 2px ${c.ring}` : undefined,
         }}
         title={`${r.title} · ${formatTime(start)}–${formatTime(end)} · ${r.userName}`}
       />

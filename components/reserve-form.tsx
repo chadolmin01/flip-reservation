@@ -470,13 +470,13 @@ function SelectableCalendar({
                 return (
                   <div
                     key={r.id}
-                    className="absolute top-2 bottom-2 rounded-sm pointer-events-none"
+                    className="absolute inset-y-0 pointer-events-none"
                     style={{
                       left: `${left}%`,
-                      width: `calc(${width}% - 2px)`,
+                      width: `calc(${width}% - 1px)`,
                       background: c.fill,
-                      opacity: 0.85,
-                      boxShadow: mine ? `0 0 0 2px ${c.ring}` : undefined,
+                      opacity: 0.9,
+                      boxShadow: mine ? `inset 0 0 0 2px ${c.ring}` : undefined,
                     }}
                     title={`${r.title} · ${r.userName}`}
                   />
@@ -486,12 +486,12 @@ function SelectableCalendar({
               {/* selected range */}
               {selRoom === room.id && selStart != null && selEnd != null && (
                 <div
-                  className="absolute top-1 bottom-1 rounded-sm pointer-events-none"
+                  className="absolute inset-y-0 pointer-events-none"
                   style={{
                     left: `${((selStart - 8) / TOTAL_HOURS) * 100}%`,
-                    width: `calc(${((selEnd - selStart) / TOTAL_HOURS) * 100}% - 2px)`,
+                    width: `calc(${((selEnd - selStart) / TOTAL_HOURS) * 100}% - 1px)`,
                     background: conflict ? "#fef2ef" : `${userColor}33`,
-                    border: `2px solid ${conflict ? "#c13515" : userRing}`,
+                    boxShadow: `inset 0 0 0 2px ${conflict ? "#c13515" : userRing}`,
                   }}
                 />
               )}
