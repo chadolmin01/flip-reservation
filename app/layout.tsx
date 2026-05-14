@@ -6,8 +6,8 @@ import { AuthProvider } from "@/components/auth-provider";
 import { AuthGate } from "@/components/auth-gate";
 
 export const metadata: Metadata = {
-  title: "FLIP 예약",
-  description: "FLIP 회의실 · 동아리실 예약 시스템",
+  title: "FLIP — 이용시설 예약",
+  description: "FLIP 동아리 이용시설 예약 시스템 (우정원 · 동아리실)",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

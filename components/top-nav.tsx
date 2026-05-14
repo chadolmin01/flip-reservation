@@ -31,7 +31,10 @@ export function TopNav() {
             priority
             className="w-8 h-8 object-contain"
           />
-          <span className="text-title-md text-rausch tracking-tight font-semibold">FLIP 예약</span>
+          <div className="leading-tight">
+            <span className="block text-title-md text-rausch font-semibold tracking-tight">FLIP</span>
+            <span className="block text-caption-sm text-muted">이용시설 예약</span>
+          </div>
         </Link>
 
         <nav className="flex items-center gap-2" aria-label="주요 탐색">
