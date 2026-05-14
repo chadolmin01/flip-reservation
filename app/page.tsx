@@ -8,11 +8,11 @@ import { colorForUser } from "@/lib/colors";
 export default async function HomePage() {
   const user = await getCurrentUser();
 
-  // 오늘 예약을 서버에서 미리 조회 → HTML에 박아 내려보냄 (클라이언트 왕복 절약)
+  // 14일치 예약을 한 번에 서버에서 미리 조회 → 화살표 이동 시 fetch 없이 클라이언트 필터링만
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   const end = new Date(start);
-  end.setDate(end.getDate() + 1);
+  end.setDate(end.getDate() + 14);
 
   const rows = user
     ? await prisma.reservation.findMany({

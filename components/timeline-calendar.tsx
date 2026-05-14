@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ROOMS, type ReservationDTO } from "@/lib/rooms";
@@ -24,14 +24,11 @@ function dayLabel(date: Date, offset: number): string {
 export function TimelineCalendar({
   initialReservations = [],
 }: {
-  initialReservations?: ReservationDTO[];
+  initialReservations?: ReservationDTO[]; // 14일치 전체
 }) {
   const { user } = useAuth();
   const [dayOffset, setDayOffset] = useState(0);
-  const [reservations, setReservations] = useState<ReservationDTO[]>(initialReservations);
-  const [loading, setLoading] = useState(false);
   const [, setTick] = useState(0);
-  const firstRender = useRef(true);
 
   // 1분마다 강제 리렌더 → 지난 시간 표시 자동 갱신
   useEffect(() => {
@@ -46,31 +43,15 @@ export function TimelineCalendar({
     return d;
   }, [dayOffset]);
 
-  useEffect(() => {
-    // 첫 렌더 + dayOffset=0이면 서버에서 미리 받은 initialReservations 사용 → fetch 스킵
-    if (firstRender.current && dayOffset === 0) {
-      firstRender.current = false;
-      return;
-    }
-    firstRender.current = false;
-    let cancelled = false;
-    setLoading(true);
-    fetch(`/api/reservations?day=${dayOffset}`, { cache: "no-store" })
-      .then((r) => r.json())
-      .then((json) => {
-        if (cancelled) return;
-        setReservations(
-          (json.reservations ?? []).filter(
-            (r: ReservationDTO) => r.status === "confirmed" || r.status === "pending",
-          ),
-        );
-        setLoading(false);
-      })
-      .catch(() => !cancelled && setLoading(false));
-    return () => {
-      cancelled = true;
-    };
-  }, [dayOffset]);
+  // 14일치 데이터에서 현재 날짜만 즉시 필터 — 화살표 클릭 시 fetch 없음
+  const reservations = useMemo(() => {
+    const dStart = baseDate.getTime();
+    const dEnd = dStart + 86_400_000;
+    return initialReservations.filter((r) => {
+      const t = new Date(r.startAt).getTime();
+      return t >= dStart && t < dEnd;
+    });
+  }, [initialReservations, baseDate]);
 
   const isToday = dayOffset === 0;
 
@@ -107,9 +88,6 @@ export function TimelineCalendar({
             </button>
           )}
         </div>
-        {loading && (
-          <span className="text-caption-sm text-muted">불러오는 중…</span>
-        )}
       </div>
 
       {/* 모바일은 가로 스크롤, 데스크탑은 폭에 맞춰 fit */}
