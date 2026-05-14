@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { QrCode, CalendarClock } from "lucide-react";
+import { CalendarClock } from "lucide-react";
 import { getRoom, type ReservationDTO } from "@/lib/rooms";
 import { cn, formatDateKo, formatTime } from "@/lib/utils";
 import { useAuth } from "@/components/auth-provider";
@@ -142,21 +142,13 @@ export default function MyPage() {
                       {formatTime(start)} – {formatTime(end)}
                     </span>
                     {!isCancelled && (
-                      <>
-                        <Link
-                          href={`/checkin/CHK-${r.id}`}
-                          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-ink text-caption hover:bg-surface-soft transition"
-                        >
-                          <QrCode className="w-3.5 h-3.5" /> 체크인 QR
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => cancel(r.id)}
-                          className="h-9 px-3 rounded-full text-caption text-error hover:underline"
-                        >
-                          취소
-                        </button>
-                      </>
+                      <button
+                        type="button"
+                        onClick={() => cancel(r.id)}
+                        className="h-9 px-3 rounded-full text-caption text-error hover:underline"
+                      >
+                        취소
+                      </button>
                     )}
                   </div>
                 </div>

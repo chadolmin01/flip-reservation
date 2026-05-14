@@ -205,9 +205,12 @@ export function ReserveForm({
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="예: 주간 정기 회의"
+                  placeholder="예: 팀Draft: 주간 회의"
                   className={inputCls}
                 />
+                <span className="block text-caption-sm text-muted mt-1">
+                  앞에 팀 이름을 붙여주세요 (예: <span className="text-ink">팀Draft</span>, <span className="text-ink">팀Beta</span>).
+                </span>
               </Field>
               <Field label="참석 인원">
                 <input
