@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+/* ---------- Pretendard Variable (한국어 + 영문 통합, Cereal VF 대체) ---------- */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+/* ============================================================
+   Airbnb 디자인 시스템 — 우정원 회의실 예약
+   desgin.md 기반 토큰 (Rausch #ff385c, Ink #222222, white canvas)
+   ============================================================ */
+
+@theme {
+  /* ---------- 색상 ---------- */
+  --color-canvas: #ffffff;
+  --color-surface-soft: #f7f7f7;
+  --color-surface-strong: #f2f2f2;
+
+  /* FLIP 브랜드 (스틸블루) — 변수명은 유지, 값만 교체 */
+  --color-rausch: #5d7b9d;
+  --color-rausch-active: #3f5a7d;
+  --color-rausch-disabled: #c8d5e3;
+  --color-rausch-tint: #eef3f8;
+  --color-flip-mark: #a8bbd0;
+
+  --color-luxe: #460479;
+  --color-plus: #92174d;
+
+  --color-hairline: #dddddd;
+  --color-hairline-soft: #ebebeb;
+  --color-border-strong: #c1c1c1;
+
+  --color-ink: #222222;
+  --color-body: #3f3f3f;
+  --color-muted: #6a6a6a;
+  --color-muted-soft: #929292;
+
+  --color-error: #c13515;
+  --color-error-hover: #b32505;
+  --color-legal-link: #428bff;
+
+  /* ---------- 폰트 ---------- */
+  --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
+    system-ui, Roboto, "Helvetica Neue", "Apple SD Gothic Neo", sans-serif;
+  --font-display: "Pretendard Variable", "Pretendard", -apple-system, system-ui, sans-serif;
+
+  /* ---------- 타입 스케일 (desgin.md 1:1) ---------- */
+  --text-rating: 64px;
+  --text-rating--line-height: 1.1;
+  --text-rating--letter-spacing: -1px;
+  --text-rating--font-weight: 700;
+
+  --text-display-xl: 28px;
+  --text-display-xl--line-height: 1.43;
+  --text-display-xl--font-weight: 700;
+
+  --text-display-lg: 22px;
+  --text-display-lg--line-height: 1.18;
+  --text-display-lg--letter-spacing: -0.44px;
+  --text-display-lg--font-weight: 500;
+
+  --text-display-md: 21px;
+  --text-display-md--line-height: 1.3;
+  --text-display-md--font-weight: 700;
+
+  --text-display-sm: 20px;
+  --text-display-sm--line-height: 1.2;
+  --text-display-sm--letter-spacing: -0.18px;
+  --text-display-sm--font-weight: 600;
+
+  --text-title-md: 16px;
+  --text-title-md--line-height: 1.25;
+  --text-title-md--font-weight: 600;
+
+  --text-title-sm: 16px;
+  --text-title-sm--line-height: 1.25;
+  --text-title-sm--font-weight: 500;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 1.5;
+  --text-body-md--font-weight: 400;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.43;
+  --text-body-sm--font-weight: 400;
+
+  --text-caption: 14px;
+  --text-caption--line-height: 1.29;
+  --text-caption--font-weight: 500;
+
+  --text-caption-sm: 13px;
+  --text-caption-sm--line-height: 1.23;
+  --text-caption-sm--font-weight: 400;
+
+  --text-badge: 11px;
+  --text-badge--line-height: 1.18;
+  --text-badge--font-weight: 600;
+
+  --text-micro: 12px;
+  --text-micro--line-height: 1.33;
+  --text-micro--font-weight: 700;
+
+  --text-uppercase-tag: 10px;
+  --text-uppercase-tag--line-height: 1.25;
+  --text-uppercase-tag--letter-spacing: 0.32px;
+  --text-uppercase-tag--font-weight: 700;
+
+  --text-nav: 16px;
+  --text-nav--line-height: 1.25;
+  --text-nav--font-weight: 600;
+
+  /* ---------- Radius ---------- */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+
+  /* ---------- Shadow (단일 그림자 티어 + scrim) ---------- */
+  --shadow-card: rgba(0, 0, 0, 0.02) 0 0 0 1px, rgba(0, 0, 0, 0.04) 0 2px 6px 0,
+    rgba(0, 0, 0, 0.1) 0 4px 8px 0;
+
+  /* ---------- 간격 ---------- */
+  --spacing-section: 64px;
+}
+
+/* ---------- Base reset & body ---------- */
+html, body {
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "ss03", "cv01", "cv11";
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+
+::selection { background: var(--color-rausch-disabled); color: var(--color-ink); }
+
+/* 단일 그림자 유틸 */
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+/* 가로 hairline 분리선 — 검색바 segment, 카드 등 */
+@utility divider-x {
+  background-color: var(--color-hairline);
+  width: 1px;
+  align-self: stretch;
+}
+
+/* 입력 포커스: 1px hairline → 2px ink, no glow */
+@utility input-base {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-sm);
+  height: 56px;
+  padding: 0 14px;
+  font-size: 16px;
+  color: var(--color-ink);
+  transition: border-color 120ms ease, border-width 120ms ease;
+}
+@utility input-base-focus {
+  outline: none;
+  border: 2px solid var(--color-ink);
+  padding: 0 13px;
+}
+
+/* 글로벌 부드러운 스크롤 */
+html { scroll-behavior: smooth; }
+
+/* 타임라인 그리드 라인 (subtle) */
+@utility timeline-grid-line {
+  background-image: linear-gradient(
+    to right,
+    var(--color-hairline-soft) 1px,
+    transparent 1px
+  );
+  background-size: var(--cell-w, 64px) 100%;
+}

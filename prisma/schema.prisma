@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  employeeId   String        @unique
+  pinHash      String
+  createdAt    DateTime      @default(now())
+  reservations Reservation[]
+
+  @@index([name])
+}
+
+model Reservation {
+  id        String   @id @default(cuid())
+  roomId    String // matches static ROOMS id ("meeting" | "club")
+  userId    String
+  title     String
+  attendees Int
+  startAt   DateTime
+  endAt     DateTime
+  status    String   @default("confirmed") // confirmed | pending | rejected | cancelled | no_show
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, startAt])
+  @@index([userId])
+}
