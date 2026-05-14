@@ -372,6 +372,8 @@ function SelectableCalendar({
       className="rounded-md border border-hairline bg-canvas overflow-hidden"
       style={{ touchAction: "none", userSelect: "none" }}
     >
+     <div className="overflow-x-auto md:overflow-visible">
+      <div className="min-w-[760px] md:min-w-0">
       {/* hour header */}
       <div className="flex border-b border-hairline">
         <div style={{ width: LABEL_W }} className="shrink-0 px-3 py-2 text-caption-sm text-muted">
@@ -498,6 +500,8 @@ function SelectableCalendar({
           </div>
         );
       })}
+      </div>
+     </div>
     </section>
   );
 }

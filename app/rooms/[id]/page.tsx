@@ -66,15 +66,15 @@ export default async function RoomDetailPage({
         </p>
       </header>
 
-      {/* 사진 갤러리 (Airbnb 스타일) */}
-      <section className="grid gap-2 mb-10 rounded-xl overflow-hidden aspect-[2/1] grid-cols-4 grid-rows-2">
-        {/* 메인 — 좌측 절반 */}
-        <div className="relative col-span-2 row-span-2 bg-surface-soft">
+      {/* 사진 갤러리 — 모바일: 메인 1장만, 데스크탑: Airbnb 5분할 */}
+      <section className="grid gap-2 mb-10 rounded-xl overflow-hidden grid-cols-1 md:grid-cols-4 md:grid-rows-2 aspect-[16/10] md:aspect-[2/1]">
+        {/* 메인 */}
+        <div className="relative bg-surface-soft md:col-span-2 md:row-span-2">
           <Image
             src={room.photos[0]}
             alt={`${room.name} 메인 사진`}
             fill
-            sizes="(max-width: 1080px) 100vw, 540px"
+            sizes="(max-width: 768px) 100vw, 540px"
             priority
             className="object-cover"
           />
@@ -84,11 +84,11 @@ export default async function RoomDetailPage({
           </span>
         </div>
 
-        {/* 서브 사진 — 2x2 (최대 4장). 사진 부족하면 surface-soft fallback */}
+        {/* 서브 사진 — 모바일에선 숨김, md+에서 2x2 */}
         {[1, 2, 3, 4].map((i) => {
           const photo = room.photos[i];
           return (
-            <div key={i} className="relative bg-surface-soft">
+            <div key={i} className="relative bg-surface-soft hidden md:block">
               {photo && (
                 <Image
                   src={photo}

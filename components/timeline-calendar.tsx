@@ -101,7 +101,9 @@ export function TimelineCalendar() {
         )}
       </div>
 
-      <div className="relative">
+      {/* 모바일은 가로 스크롤, 데스크탑은 폭에 맞춰 fit */}
+      <div className="overflow-x-auto md:overflow-visible">
+       <div className="relative min-w-[760px] md:min-w-0">
         <div className="flex border-b border-hairline">
           <div className="w-[140px] shrink-0" />
           <div className="flex-1 flex">
@@ -180,6 +182,7 @@ export function TimelineCalendar() {
             </div>
           );
         })}
+       </div>
       </div>
     </section>
   );
