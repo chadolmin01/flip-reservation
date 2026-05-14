@@ -47,7 +47,8 @@ export async function GET(req: Request) {
     })),
   });
 
-  return new NextResponse(buf, {
+  // Blob 으로 감싸 BodyInit 호환 (Uint8Array 직접은 Next.js NextResponse TS 타입에서 거부)
+  return new NextResponse(new Blob([buf as BlobPart]), {
     headers: {
       "Content-Type": "application/vnd.ms-excel",
       "Content-Disposition": `attachment; filename="usage-${roomId}-${month}.xls"`,
