@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ChevronLeft, CheckCircle2, AlertTriangle, RotateCcw } from "lucide-react";
 import type { Room, ReservationDTO } from "@/lib/rooms";
 import { ROOMS } from "@/lib/rooms";
 import { cn, formatDateKo, isPastSlot } from "@/lib/utils";
@@ -273,8 +273,10 @@ export function ReserveForm({
                   setSelStart(null);
                   setSelEnd(null);
                 }}
-                className="text-caption-sm text-muted hover:text-ink hover:underline"
+                className="inline-flex items-center gap-1.5 h-11 px-4 rounded-sm border border-hairline text-caption text-ink hover:bg-surface-soft hover:border-ink transition"
+                aria-label="선택 해제"
               >
+                <RotateCcw className="w-3.5 h-3.5" />
                 해제
               </button>
             )}
