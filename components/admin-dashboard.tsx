@@ -1,13 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Lock, Download } from "lucide-react";
+import { Lock, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { ROOMS, getRoom, type ReservationDTO } from "@/lib/rooms";
 import { cn, formatDateKo, formatTime } from "@/lib/utils";
 
 const ADMIN_PASSWORD = "FLIP1234";
 const ADMIN_UNLOCK_KEY = "wjw_admin_unlocked";
+
+function monthKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+function shiftMonth(key: string, delta: number): string {
+  const [y, m] = key.split("-").map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return monthKey(d);
+}
+function monthLabel(key: string): string {
+  const [, m] = key.split("-").map(Number);
+  return `${m}월`;
+}
 
 export function AdminDashboard({
   initialReservations,
@@ -24,14 +37,38 @@ export function AdminDashboard({
     setPwReady(true);
   }, []);
 
-  // 월별 내보내기 상태
-  const todayDate = new Date();
-  const currentMonthValue = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, "0")}`;
-  const [exportMonth, setExportMonth] = useState(currentMonthValue);
-  const [exportRoomId, setExportRoomId] = useState(ROOMS[0].id);
+  // 월별 보기 + 내보내기 통합 상태
+  const currentMonthValue = useMemo(() => monthKey(new Date()), []);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthValue);
+  const [selectedRoomId, setSelectedRoomId] = useState(ROOMS[0].id);
+  const [monthData, setMonthData] = useState<ReservationDTO[]>([]);
+  const [monthLoading, setMonthLoading] = useState(false);
+
+  // 월/회의실 바뀌면 해당 월 데이터 새로 페치
+  useEffect(() => {
+    if (!unlocked) return;
+    let cancelled = false;
+    setMonthLoading(true);
+    fetch(
+      `/api/admin/reservations?month=${encodeURIComponent(selectedMonth)}&room=${encodeURIComponent(selectedRoomId)}`,
+      { cache: "no-store" },
+    )
+      .then((r) => r.json())
+      .then((json) => {
+        if (cancelled) return;
+        setMonthData(json.reservations ?? []);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setMonthLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedMonth, selectedRoomId, unlocked]);
 
   function downloadExport() {
-    const url = `/api/admin/export?month=${encodeURIComponent(exportMonth)}&room=${encodeURIComponent(exportRoomId)}`;
+    const url = `/api/admin/export?month=${encodeURIComponent(selectedMonth)}&room=${encodeURIComponent(selectedRoomId)}`;
     const a = document.createElement("a");
     a.href = url;
     a.rel = "noopener";
@@ -94,27 +131,62 @@ export function AdminDashboard({
         <Kpi label="14일 합산" value={String(reservations.length)} />
       </div>
 
-      {/* 월별 사용일지 내보내기 */}
+      {/* 월별 사용 — 월/회의실 필터 + 다운로드 + 리스트 */}
       <section className="mb-10">
-        <h2 className="text-display-md text-ink mb-1">월별 사용일지 내보내기</h2>
-        <p className="text-body-sm text-muted mb-3">
-          창업지원실 양식과 동일한 .xls 파일로 다운로드됩니다.
-        </p>
-        <div className="bg-canvas border border-hairline rounded-md p-5 flex flex-wrap items-end gap-3">
-          <label className="block">
+        <div className="flex items-baseline justify-between mb-3 gap-3 flex-wrap">
+          <h2 className="text-display-md text-ink">
+            월별 사용 — <span className="text-rausch">{monthLabel(selectedMonth)}</span>
+          </h2>
+          <p className="text-body-sm text-muted">
+            창업지원실 양식과 동일한 .xls 다운로드 가능
+          </p>
+        </div>
+
+        {/* 컨트롤 바 */}
+        <div className="bg-canvas border border-hairline rounded-md p-4 flex flex-wrap items-end gap-3 mb-3">
+          {/* 월 네비게이션 (이전/현재 picker/다음) */}
+          <div className="block">
             <span className="block text-caption-sm text-muted mb-1.5">월</span>
-            <input
-              type="month"
-              value={exportMonth}
-              onChange={(e) => setExportMonth(e.target.value)}
-              className="h-11 rounded-sm border border-hairline px-3 text-body-md focus:outline-none focus:border-2 focus:border-ink focus:px-[11px] transition tabular-nums"
-            />
-          </label>
+            <div className="inline-flex items-center gap-1">
+              <button
+                type="button"
+                aria-label="이전 달"
+                onClick={() => setSelectedMonth((m) => shiftMonth(m, -1))}
+                className="w-9 h-11 inline-flex items-center justify-center rounded-sm border border-hairline hover:bg-surface-soft"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <input
+                type="month"
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="h-11 rounded-sm border border-hairline px-3 text-body-md focus:outline-none focus:border-2 focus:border-ink focus:px-[11px] transition tabular-nums"
+              />
+              <button
+                type="button"
+                aria-label="다음 달"
+                onClick={() => setSelectedMonth((m) => shiftMonth(m, 1))}
+                className="w-9 h-11 inline-flex items-center justify-center rounded-sm border border-hairline hover:bg-surface-soft"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              {selectedMonth !== currentMonthValue && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedMonth(currentMonthValue)}
+                  className="ml-1 text-caption-sm text-muted hover:text-ink hover:underline"
+                >
+                  이번 달
+                </button>
+              )}
+            </div>
+          </div>
+
           <label className="block">
             <span className="block text-caption-sm text-muted mb-1.5">회의실</span>
             <select
-              value={exportRoomId}
-              onChange={(e) => setExportRoomId(e.target.value)}
+              value={selectedRoomId}
+              onChange={(e) => setSelectedRoomId(e.target.value)}
               className="h-11 rounded-sm border border-hairline px-3 text-body-md focus:outline-none focus:border-2 focus:border-ink focus:px-[11px] transition bg-canvas appearance-none pr-8"
               style={{
                 backgroundImage:
@@ -130,45 +202,27 @@ export function AdminDashboard({
               ))}
             </select>
           </label>
+
           <button
             type="button"
             onClick={downloadExport}
-            className="inline-flex items-center gap-1.5 h-11 px-4 rounded-sm bg-ink text-white text-button-md hover:opacity-90"
+            className="inline-flex items-center gap-1.5 h-11 px-4 rounded-sm bg-ink text-white text-button-md hover:opacity-90 ml-auto"
           >
             <Download className="w-4 h-4" />
-            엑셀 다운로드
+            .xls 다운로드
           </button>
         </div>
-      </section>
 
-
-      <section className="mb-10">
-        <h2 className="text-display-md text-ink mb-3">회의실 이용률 (14일)</h2>
-        <div className="bg-canvas border border-hairline rounded-md p-5 space-y-4">
-          {roomUtil.map(({ room, pct }) => (
-            <div key={room.id} className="grid grid-cols-[180px_1fr_50px] items-center gap-3">
-              <p className="text-body-md text-ink truncate">{room.name}</p>
-              <div className="h-2 rounded-full bg-surface-strong overflow-hidden">
-                <div className="h-full rounded-full bg-rausch" style={{ width: `${pct}%` }} />
-              </div>
-              <p className="text-body-sm text-ink text-right tabular-nums">{pct}%</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2 className="text-display-md text-ink mb-1">예약 · 취소 내역</h2>
-        <p className="text-body-sm text-muted mb-3">
-          최근 14일간 모든 예약 (취소 포함)
-        </p>
+        {/* 월별 리스트 */}
         <ul className="bg-canvas border border-hairline rounded-md divide-y divide-hairline-soft">
-          {reservations.length === 0 ? (
+          {monthLoading ? (
+            <li className="px-5 py-12 text-center text-body-md text-muted">불러오는 중…</li>
+          ) : monthData.length === 0 ? (
             <li className="px-5 py-12 text-center text-body-md text-muted">
-              아직 예약이 없습니다.
+              {monthLabel(selectedMonth)}에 해당 회의실 예약이 없습니다.
             </li>
           ) : (
-            reservations.map((r) => {
+            monthData.map((r) => {
               const room = getRoom(r.roomId);
               if (!room) return null;
               const start = new Date(r.startAt);
@@ -199,15 +253,13 @@ export function AdminDashboard({
                       {r.title}
                     </p>
                     <p className="text-body-sm text-muted truncate">
-                      <span className="text-ink tabular-nums">
-                        {formatDateKo(start)}
-                      </span>
+                      <span className="text-ink tabular-nums">{formatDateKo(start)}</span>
                       {" · "}
                       <span className="tabular-nums">
                         {formatTime(start)}–{formatTime(end)}
                       </span>
                       {" · "}
-                      {room.name} · {r.userName}
+                      {r.userName} · {r.attendees}명
                     </p>
                   </div>
                   <span
@@ -232,6 +284,23 @@ export function AdminDashboard({
           )}
         </ul>
       </section>
+
+
+      <section className="mb-10">
+        <h2 className="text-display-md text-ink mb-3">회의실 이용률 (14일)</h2>
+        <div className="bg-canvas border border-hairline rounded-md p-5 space-y-4">
+          {roomUtil.map(({ room, pct }) => (
+            <div key={room.id} className="grid grid-cols-[180px_1fr_50px] items-center gap-3">
+              <p className="text-body-md text-ink truncate">{room.name}</p>
+              <div className="h-2 rounded-full bg-surface-strong overflow-hidden">
+                <div className="h-full rounded-full bg-rausch" style={{ width: `${pct}%` }} />
+              </div>
+              <p className="text-body-sm text-ink text-right tabular-nums">{pct}%</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
     </div>
   );
 }
