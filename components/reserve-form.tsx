@@ -138,6 +138,7 @@ export function ReserveForm({
         throw new Error(err.error ?? "예약에 실패했습니다");
       }
       setSubmitted(true);
+      router.refresh(); // 서버 캐시 + 라우터 캐시 invalidate
       setTimeout(() => router.push("/my"), 1300);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "예약에 실패했습니다");

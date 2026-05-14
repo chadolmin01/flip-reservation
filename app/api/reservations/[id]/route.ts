@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 
@@ -21,6 +22,7 @@ export async function DELETE(
     data: { status: "cancelled" },
   });
 
+  revalidateTag("reservations");
   return NextResponse.json({ ok: true });
 }
 
@@ -50,6 +52,7 @@ export async function PATCH(
     data: { status: body.status },
   });
 
+  revalidateTag("reservations");
   return NextResponse.json({
     reservation: {
       id: updated.id,

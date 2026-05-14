@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { TimelineCalendar } from "@/components/timeline-calendar";
 import { RoomCard } from "@/components/room-card";
 import { ROOMS, type ReservationDTO } from "@/lib/rooms";
@@ -5,25 +6,36 @@ import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { colorForUser } from "@/lib/colors";
 
+// 서버 캐시: 14일치 예약을 'reservations' 태그로 보관
+// → POST/DELETE/PATCH 가 revalidateTag('reservations') 호출 시까지 DB 안 침
+// → 60초 안전 revalidate (이벤트 없이도 1분 이상 묵으면 자동 갱신)
+const getCached14DayReservations = unstable_cache(
+  async (_dateKey: string) => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 14);
+    return prisma.reservation.findMany({
+      where: {
+        startAt: { gte: start, lt: end },
+        status: { in: ["confirmed", "pending"] },
+      },
+      include: { user: { select: { name: true, employeeId: true } } },
+      orderBy: { startAt: "asc" },
+    });
+  },
+  ["reservations-14d"],
+  { tags: ["reservations"], revalidate: 60 },
+);
+
 export default async function HomePage() {
   const user = await getCurrentUser();
 
-  // 14일치 예약을 한 번에 서버에서 미리 조회 → 화살표 이동 시 fetch 없이 클라이언트 필터링만
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 14);
+  // 자정 넘어가면 캐시키도 바뀌게 오늘 날짜 포함
+  const t = new Date();
+  const dateKey = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 
-  const rows = user
-    ? await prisma.reservation.findMany({
-        where: {
-          startAt: { gte: start, lt: end },
-          status: { in: ["confirmed", "pending"] },
-        },
-        include: { user: { select: { name: true, employeeId: true } } },
-        orderBy: { startAt: "asc" },
-      })
-    : [];
+  const rows = user ? await getCached14DayReservations(dateKey) : [];
 
   const initialReservations: ReservationDTO[] = rows.map((r) => ({
     id: r.id,

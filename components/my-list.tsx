@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { CalendarClock } from "lucide-react";
 import { getRoom, type ReservationDTO } from "@/lib/rooms";
 import { cn, formatDateKo, formatTime } from "@/lib/utils";
@@ -18,20 +19,25 @@ export function MyList({
   initialReservations: ReservationDTO[];
 }) {
   const color = colorForUser(user.employeeId);
+  const router = useRouter();
   const [reservations, setReservations] = useState(initialReservations);
 
-  const cancel = useCallback(async (id: string) => {
-    if (!confirm("이 예약을 취소할까요?")) return;
-    const res = await fetch(`/api/reservations/${id}`, { method: "DELETE" });
-    if (res.ok) {
-      setReservations((curr) =>
-        curr.map((r) => (r.id === id ? { ...r, status: "cancelled" } : r)),
-      );
-    } else {
-      const err = await res.json().catch(() => ({}));
-      alert(err.error ?? "취소에 실패했습니다");
-    }
-  }, []);
+  const cancel = useCallback(
+    async (id: string) => {
+      if (!confirm("이 예약을 취소할까요?")) return;
+      const res = await fetch(`/api/reservations/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setReservations((curr) =>
+          curr.map((r) => (r.id === id ? { ...r, status: "cancelled" } : r)),
+        );
+        router.refresh(); // 홈 캐시도 같이 무효화 → 다음 / 방문 시 신선한 데이터
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error ?? "취소에 실패했습니다");
+      }
+    },
+    [router],
+  );
 
   if (reservations.length === 0) {
     return (

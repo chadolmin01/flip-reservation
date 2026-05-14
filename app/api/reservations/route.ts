@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { ROOMS } from "@/lib/rooms";
@@ -134,6 +135,9 @@ export async function POST(req: Request) {
   if ("error" in result) {
     return NextResponse.json({ error: result.error }, { status: 409 });
   }
+
+  // 캐시 무효화 — 다음 / 페이지 진입 시 신선한 데이터로 즉시 반영
+  revalidateTag("reservations");
 
   return NextResponse.json({
     reservation: {
