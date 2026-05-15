@@ -25,7 +25,6 @@ function dayLabel(offset: number): string {
 const HOURS = Array.from({ length: 16 }, (_, i) => 8 + i); // 08..23
 const TOTAL_HOURS = HOURS.length; // 16
 const ROW_H = 56;
-const LABEL_W = 140;
 
 const fmtHour = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
@@ -165,29 +164,29 @@ export function ReserveForm({
   }
 
   return (
-    <div className="mx-auto max-w-[1080px] px-6 lg:px-10 py-8">
-      <div className="flex items-center justify-between mb-4">
+    <div className="mx-auto max-w-[1080px] px-4 sm:px-6 lg:px-10 py-6 sm:py-8">
+      <div className="flex items-center justify-between mb-4 gap-2">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-caption text-ink hover:underline"
+          className="inline-flex items-center gap-1.5 text-caption text-ink hover:underline shrink-0"
         >
           <ChevronLeft className="w-4 h-4" /> 캘린더로
         </Link>
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-soft">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-soft min-w-0">
           <span
-            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-caption-sm font-medium"
+            className="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-caption-sm font-medium shrink-0"
             style={{ background: color.fill }}
           >
             {user.name.slice(0, 1)}
           </span>
-          <span className="text-body-sm text-ink">
+          <span className="text-body-sm text-ink truncate">
             {user.name}
-            <span className="text-muted"> · {user.employeeId}</span>
+            <span className="text-muted hidden sm:inline"> · {user.employeeId}</span>
           </span>
         </div>
       </div>
 
-      <h1 className="text-display-xl text-ink mb-6">예약하기</h1>
+      <h1 className="text-display-lg sm:text-display-xl text-ink mb-6">예약하기</h1>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* 1단: 미니 캘린더 + 회의 정보 */}
@@ -227,7 +226,7 @@ export function ReserveForm({
           </div>
         </div>
 
-        {/* 2단: 시간 드래그 */}
+        {/* 2단: 시간 선택 */}
         <div>
           <p className="text-caption-sm text-muted mb-2">시간</p>
           <SelectableCalendar
@@ -243,12 +242,12 @@ export function ReserveForm({
             onSelect={applySelection}
           />
           <p className="text-caption-sm text-muted mt-2">
-            시간 칸을 클릭하고 드래그하세요.
+            시작 시간을 누르고, 종료 시간을 한 번 더 누르세요. PC에서는 드래그도 됩니다.
           </p>
         </div>
 
         {/* 3단: 선택 요약 + 제출 */}
-        <div className="rounded-md border border-hairline bg-canvas p-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="rounded-md border border-hairline bg-canvas p-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3">
           <div className="flex-1 min-w-0">
             {selStart != null && selEnd != null ? (
               <>
@@ -263,13 +262,18 @@ export function ReserveForm({
                       다른 예약과 겹칩니다
                     </span>
                   )}
+                  {!conflict && selEnd - selStart === 1 && (
+                    <span className="ml-2 text-muted-soft">
+                      · 종료 시간을 한 번 더 누르면 늘어납니다
+                    </span>
+                  )}
                 </p>
               </>
             ) : (
               <p className="text-body-md text-muted">위 캘린더에서 시간 범위를 선택하세요</p>
             )}
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3 sm:shrink-0">
             {selStart != null && selEnd != null && (
               <button
                 type="button"
@@ -277,7 +281,7 @@ export function ReserveForm({
                   setSelStart(null);
                   setSelEnd(null);
                 }}
-                className="inline-flex items-center gap-1.5 h-11 px-4 rounded-sm border border-hairline text-caption text-ink hover:bg-surface-soft hover:border-ink transition"
+                className="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-sm border border-hairline text-caption text-ink hover:bg-surface-soft hover:border-ink transition shrink-0"
                 aria-label="선택 해제"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -293,7 +297,7 @@ export function ReserveForm({
                 conflict ||
                 submitting
               }
-              className="h-11 px-6 rounded-sm text-white text-button-md transition disabled:opacity-40"
+              className="flex-1 sm:flex-initial h-11 px-6 rounded-sm text-white text-button-md transition disabled:opacity-40"
               style={{ background: color.fill }}
             >
               {submitting
@@ -328,7 +332,7 @@ function SelectableCalendar({
   conflict: boolean;
   onSelect: (roomId: string, start: number, end: number) => void;
 }) {
-  // 드래그 시작 지점 — null이면 드래그 중 아님
+  // 마우스 드래그 시작 지점 — null이면 드래그 중 아님 (터치에서는 사용하지 않음)
   const [dragFrom, setDragFrom] = useState<{ roomId: string; hour: number } | null>(null);
 
   useEffect(() => {
@@ -371,13 +375,15 @@ function SelectableCalendar({
   return (
     <section
       className="rounded-md border border-hairline bg-canvas overflow-hidden"
-      style={{ touchAction: "none", userSelect: "none" }}
+      style={{ userSelect: "none" }}
     >
      <div className="overflow-x-auto md:overflow-visible">
       <div className="min-w-[760px] md:min-w-0">
       {/* hour header */}
       <div className="flex border-b border-hairline">
-        <div style={{ width: LABEL_W }} className="shrink-0 px-3 py-2 text-caption-sm text-muted">
+        <div
+          className="shrink-0 px-3 py-2 text-caption-sm text-muted w-[96px] md:w-[140px]"
+        >
           공간
         </div>
         <div className="flex-1 flex">
@@ -401,15 +407,14 @@ function SelectableCalendar({
             style={{ height: ROW_H }}
           >
             <div
-              style={{ width: LABEL_W }}
-              className="shrink-0 flex items-center gap-2 px-3 border-r border-hairline"
+              className="shrink-0 flex items-center gap-2 px-2 sm:px-3 border-r border-hairline w-[96px] md:w-[140px]"
             >
               <Image
                 src={room.photoUrl}
                 alt={room.name}
                 width={32}
                 height={32}
-                className="w-8 h-8 rounded-sm shrink-0 object-cover"
+                className="w-8 h-8 rounded-sm shrink-0 object-cover hidden sm:block"
               />
               <div className="min-w-0">
                 <p className="text-title-sm text-ink truncate">{room.name}</p>
@@ -448,11 +453,30 @@ function SelectableCalendar({
                       data-room={room.id}
                       data-hour={h}
                       onPointerDown={(e) => {
+                        const isTouch = e.pointerType === "touch";
+                        // 터치: 같은 방에 이미 선택이 있으면 시작점에서 여기까지로 확장
+                        if (isTouch) {
+                          if (
+                            selRoom === room.id &&
+                            selStart != null &&
+                            selEnd != null
+                          ) {
+                            const anchor = selStart;
+                            const a = Math.min(anchor, h);
+                            const b = Math.max(anchor, h);
+                            onSelect(room.id, a, b + 1);
+                          } else {
+                            onSelect(room.id, h, h + 1);
+                          }
+                          return;
+                        }
+                        // 마우스/펜: 기존 드래그 동작
                         e.preventDefault();
                         setDragFrom({ roomId: room.id, hour: h });
                         onSelect(room.id, h, h + 1);
                       }}
                       className="flex-1 min-w-0 hover:bg-rausch-tint transition cursor-pointer"
+                      style={{ touchAction: "manipulation" }}
                       aria-label={`${room.name} ${h}시`}
                       role="button"
                     />
@@ -545,7 +569,7 @@ function MiniCalendar({
           <div
             key={w}
             className={cn(
-              "w-10 h-7 flex items-center justify-center text-caption-sm",
+              "w-9 h-7 sm:w-10 flex items-center justify-center text-caption-sm",
               i === 0 ? "text-error" : i === 6 ? "text-legal-link" : "text-muted",
             )}
           >
@@ -571,7 +595,7 @@ function MiniCalendar({
               disabled={disabled}
               onClick={() => onChange(offset)}
               className={cn(
-                "w-10 h-10 rounded-full text-body-sm transition tabular-nums",
+                "w-9 h-9 sm:w-10 sm:h-10 rounded-full text-body-sm transition tabular-nums",
                 disabled && "text-muted-soft/50 cursor-not-allowed",
                 !disabled && !isSelected && "text-ink hover:bg-surface-soft",
                 !disabled && !isSelected && dow === 0 && "text-error",

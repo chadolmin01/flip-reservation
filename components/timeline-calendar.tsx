@@ -57,24 +57,24 @@ export function TimelineCalendar({
 
   return (
     <section className="rounded-md border border-hairline bg-canvas overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between px-3 sm:px-4 py-3 border-b border-hairline gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
           <button
             type="button"
             aria-label="이전 날짜"
             onClick={() => setDayOffset((d) => d - 1)}
-            className="w-8 h-8 inline-flex items-center justify-center rounded-full border border-hairline hover:bg-surface-soft transition"
+            className="w-9 h-9 sm:w-8 sm:h-8 shrink-0 inline-flex items-center justify-center rounded-full border border-hairline hover:bg-surface-soft transition"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <h3 className="text-display-sm text-ink min-w-[200px] text-center">
+          <h3 className="text-title-md sm:text-display-sm text-ink min-w-[140px] sm:min-w-[200px] text-center truncate">
             {dayLabel(baseDate, dayOffset)}
           </h3>
           <button
             type="button"
             aria-label="다음 날짜"
             onClick={() => setDayOffset((d) => d + 1)}
-            className="w-8 h-8 inline-flex items-center justify-center rounded-full border border-hairline hover:bg-surface-soft transition"
+            className="w-9 h-9 sm:w-8 sm:h-8 shrink-0 inline-flex items-center justify-center rounded-full border border-hairline hover:bg-surface-soft transition"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -82,7 +82,7 @@ export function TimelineCalendar({
             <button
               type="button"
               onClick={() => setDayOffset(0)}
-              className="ml-1 text-caption-sm text-muted hover:text-ink hover:underline"
+              className="ml-1 text-caption-sm text-muted hover:text-ink hover:underline shrink-0"
             >
               오늘로
             </button>
@@ -94,7 +94,7 @@ export function TimelineCalendar({
       <div className="overflow-x-auto md:overflow-visible">
        <div className="relative min-w-[760px] md:min-w-0">
         <div className="flex border-b border-hairline">
-          <div className="w-[140px] shrink-0" />
+          <div className="w-[96px] md:w-[140px] shrink-0" />
           <div className="flex-1 flex">
             {HOURS.map((h) => (
               <div
@@ -117,7 +117,7 @@ export function TimelineCalendar({
             >
               <Link
                 href={`/rooms/${room.id}`}
-                className="w-[140px] shrink-0 flex items-center px-3 hover:bg-surface-soft transition border-r border-hairline"
+                className="w-[96px] md:w-[140px] shrink-0 flex items-center px-2 md:px-3 hover:bg-surface-soft transition border-r border-hairline"
               >
                 <div className="min-w-0">
                   <p className="text-title-sm text-ink truncate">{room.name}</p>

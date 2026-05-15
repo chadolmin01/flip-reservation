@@ -30,15 +30,15 @@ export default async function MyPage() {
   const color = colorForUser(user.employeeId);
 
   return (
-    <div className="mx-auto max-w-[1080px] px-6 lg:px-10 py-8">
-      <div className="flex items-center gap-3 mb-8">
+    <div className="mx-auto max-w-[1080px] px-4 sm:px-6 lg:px-10 py-6 sm:py-8">
+      <div className="flex items-center gap-3 mb-6 sm:mb-8 min-w-0">
         <span
-          className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white font-medium"
+          className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white font-medium shrink-0"
           style={{ background: color.fill }}
         >
           {user.name.slice(0, 1)}
         </span>
-        <h1 className="text-display-xl text-ink">
+        <h1 className="text-display-lg sm:text-display-xl text-ink truncate">
           {user.name}
           <span className="text-muted font-normal ml-1.5">#{user.employeeId}</span>
         </h1>

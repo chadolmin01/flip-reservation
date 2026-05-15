@@ -21,23 +21,23 @@ export function TopNav() {
 
   return (
     <header className="sticky top-0 z-40 bg-canvas border-b border-hairline">
-      <div className="mx-auto max-w-[1080px] h-16 px-6 lg:px-10 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 shrink-0">
+      <div className="mx-auto max-w-[1080px] h-16 px-4 sm:px-6 lg:px-10 flex items-center justify-between gap-2">
+        <Link href="/" className="flex items-center gap-2 shrink-0 min-w-0">
           <Image
             src="/flip-mark.png"
             alt="FLIP"
             width={32}
             height={32}
             priority
-            className="w-8 h-8 object-contain"
+            className="w-8 h-8 object-contain shrink-0"
           />
-          <div className="leading-tight">
+          <div className="leading-tight min-w-0">
             <span className="block text-title-md text-rausch font-semibold tracking-tight">FLIP</span>
-            <span className="block text-caption-sm text-muted">이용시설 예약</span>
+            <span className="hidden sm:block text-caption-sm text-muted">이용시설 예약</span>
           </div>
         </Link>
 
-        <nav className="flex items-center gap-2" aria-label="주요 탐색">
+        <nav className="flex items-center gap-1 sm:gap-2 min-w-0" aria-label="주요 탐색">
           {tabs.map((t) => {
             const active = pathname === t.href;
             return (
@@ -45,7 +45,7 @@ export function TopNav() {
                 key={t.href}
                 href={t.href}
                 className={cn(
-                  "h-9 px-3 inline-flex items-center rounded-full text-body-md transition",
+                  "h-9 px-2.5 sm:px-3 inline-flex items-center rounded-full text-body-sm sm:text-body-md transition shrink-0",
                   active ? "bg-ink text-white" : "text-ink hover:bg-surface-soft",
                 )}
               >
@@ -56,7 +56,7 @@ export function TopNav() {
           <Link
             href="/admin"
             className={cn(
-              "h-9 px-3 inline-flex items-center rounded-full text-body-sm transition",
+              "h-9 px-2.5 sm:px-3 inline-flex items-center rounded-full text-body-sm transition shrink-0",
               pathname.startsWith("/admin")
                 ? "bg-ink text-white"
                 : "text-muted hover:text-ink hover:bg-surface-soft",
@@ -66,7 +66,7 @@ export function TopNav() {
           </Link>
 
           {user && (
-            <div className="ml-3 pl-3 border-l border-hairline flex items-center gap-2">
+            <div className="ml-2 sm:ml-3 sm:pl-3 sm:border-l sm:border-hairline flex items-center gap-2 shrink-0">
               <span className="hidden sm:flex items-center gap-2">
                 <span
                   className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-caption-sm font-medium"

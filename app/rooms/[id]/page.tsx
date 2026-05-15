@@ -47,7 +47,7 @@ export default async function RoomDetailPage({
   });
 
   return (
-    <div className="mx-auto max-w-[1080px] px-6 lg:px-10">
+    <div className="mx-auto max-w-[1080px] px-4 sm:px-6 lg:px-10">
       {/* back link — 홈으로 */}
       <div className="pt-6 pb-4">
         <Link
@@ -79,7 +79,7 @@ export default async function RoomDetailPage({
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-          <span className="absolute bottom-5 left-6 text-white text-display-xl drop-shadow">
+          <span className="absolute bottom-4 left-4 sm:bottom-5 sm:left-6 text-white text-display-md sm:text-display-xl drop-shadow">
             {room.name}
           </span>
         </div>

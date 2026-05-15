@@ -65,10 +65,10 @@ export function MyList({
         const end = new Date(r.endAt);
         const isCancelled = r.status === "cancelled";
         return (
-          <li key={r.id} className="py-5 flex items-start gap-5">
+          <li key={r.id} className="py-5 flex items-start gap-3 sm:gap-5">
             <div
               className={cn(
-                "relative w-24 h-24 rounded-md shrink-0 overflow-hidden bg-surface-soft",
+                "relative w-16 h-16 sm:w-24 sm:h-24 rounded-md shrink-0 overflow-hidden bg-surface-soft",
                 isCancelled && "opacity-40",
               )}
             >
@@ -76,11 +76,11 @@ export function MyList({
                 src={room.photoUrl}
                 alt={room.name}
                 fill
-                sizes="96px"
+                sizes="(max-width: 640px) 64px, 96px"
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent" />
-              <span className="absolute bottom-2 left-2 text-white text-caption font-medium drop-shadow">
+              <span className="hidden sm:block absolute bottom-2 left-2 text-white text-caption font-medium drop-shadow">
                 {room.name}
               </span>
             </div>
@@ -93,13 +93,13 @@ export function MyList({
                   </p>
                   <h3
                     className={cn(
-                      "text-display-sm text-ink truncate mt-1",
+                      "text-title-md sm:text-display-sm text-ink truncate mt-1",
                       isCancelled && "line-through text-muted",
                     )}
                   >
                     {r.title}
                   </h3>
-                  <p className="text-body-sm text-muted mt-1">
+                  <p className="text-body-sm text-muted mt-1 truncate">
                     {room.name} · {room.location} · {r.attendees}명
                   </p>
                 </div>

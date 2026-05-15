@@ -44,9 +44,9 @@ export default async function HomePage() {
   const userColor = user ? colorForUser(user.employeeId).fill : null;
 
   return (
-    <div className="mx-auto max-w-[1080px] px-6 lg:px-10 py-8">
-      <section className="mb-12">
-        <div className="flex items-center justify-end gap-3 text-caption-sm mb-3">
+    <div className="mx-auto max-w-[1080px] px-4 sm:px-6 lg:px-10 py-6 sm:py-8">
+      <section className="mb-10 sm:mb-12">
+        <div className="flex items-center justify-end gap-3 text-caption-sm mb-3 flex-wrap">
           {userColor && (
             <span className="inline-flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-sm" style={{ background: userColor }} />
